@@ -26,21 +26,16 @@ class GoogleSheetsHelper {
         private const val DEVICE_SHEET_RANGE = "Sheet1"
         private const val USERS_SHEET_RANGE = "Sheet2"
         @JvmStatic
-        private var credentials: Credential? = null
-
-        private fun getCredentials(): Credential {
-            if (credentials == null) {
-                val credentialsFile = GoogleSheetsHelper::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
-                credentials = GoogleCredential.fromStream(credentialsFile)
-                    .createScoped(SCOPES)
-            }
-            return credentials!!
+        private val credentials: Credential by lazy {
+            val credentialsFile = GoogleSheetsHelper::class.java.getResourceAsStream(CREDENTIALS_FILE_PATH)
+            GoogleCredential.fromStream(credentialsFile)
+                .createScoped(SCOPES)
         }
 
         private fun getSpreadsheet(): Sheets = Sheets.Builder(
             GoogleNetHttpTransport.newTrustedTransport(),
             JacksonFactory.getDefaultInstance(),
-            getCredentials()
+            credentials
         ).setApplicationName(APPLICATION_NAME).build()
 
         fun writeDeviceTake(username: String, deviceId: String): Boolean {
